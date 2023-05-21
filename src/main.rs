@@ -1,27 +1,14 @@
+use advent_of_code::{challenge_one, challenge_two};
 use std::fs;
 
 fn main() -> std::io::Result<()> {
-    let input = fs::read_to_string("input.txt")?;
+    // CHALLENGE 1
+    let input = fs::read_to_string("input_challenge_one.txt")?;
+    println!("Challenge one: {:?}", challenge_one::challenge_one(input));
 
-    let mut raindeers: Vec<u32> = Vec::new();
-
-    let mut count: u32 = 0;
-
-    for line in input.lines() {
-        let num = line.trim().parse::<u32>().unwrap_or(0);
-
-        if num == 0 {
-            raindeers.push(count);
-            count = 0;
-            continue;
-        }
-
-        count += num;
-    }
-
-    let max = raindeers.into_iter().max().unwrap_or(0);
-
-    println!("Max raindeer: {}", max);
+    // CHALLENGE 2
+    let input = fs::read_to_string("input_challenge_two.txt")?;
+    println!("Challenge two: {:?}", challenge_two::challenge_two(input));
 
     Ok(())
 }

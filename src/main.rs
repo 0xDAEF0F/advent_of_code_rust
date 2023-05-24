@@ -1,14 +1,22 @@
-use advent_of_code::{challenge_one, challenge_two};
+use advent_of_code::{day_one_a, day_one_b, day_two_a, day_two_b};
 use std::fs;
 
 fn main() -> std::io::Result<()> {
-    // CHALLENGE 1
-    let input = fs::read_to_string("input_challenge_one.txt")?;
-    println!("Challenge one: {:?}", challenge_one::challenge_one(input));
+    // Day One - A
+    let input = fs::read_to_string("input_day_one.txt")?;
+    println!("Day One A: {:?}", day_one_a::day_one_a(input));
 
-    // CHALLENGE 2
-    let input = fs::read_to_string("input_challenge_two.txt")?;
-    println!("Challenge two: {:?}", challenge_two::challenge_two(input));
+    // Day One - B
+    let input = fs::read_to_string("input_day_one.txt")?;
+    println!("Day One B: {:?}", day_one_b::day_one_b(input));
+
+    // Day Two - A
+    let input = fs::read_to_string("input_day_two.txt")?;
+    println!("Day Two A: {:?}", day_two_a::day_two_a(input));
+
+    // Day Two - B
+    let input = fs::read_to_string("input_day_two.txt")?;
+    println!("Day Two B: {:?}", day_two_b::day_two_b(input));
 
     Ok(())
 }

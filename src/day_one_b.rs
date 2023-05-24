@@ -1,4 +1,4 @@
-pub fn challenge_one(input: String) -> u32 {
+pub fn day_one_b(input: String) -> u32 {
     let mut raindeers: Vec<u32> = Vec::new();
 
     let mut count: u32 = 0;
@@ -15,5 +15,7 @@ pub fn challenge_one(input: String) -> u32 {
         count += num;
     }
 
-    raindeers.into_iter().max().unwrap_or(0)
+    raindeers.sort_by(|a, b| b.cmp(a));
+
+    raindeers.into_iter().take(3).sum()
 }

@@ -1,4 +1,4 @@
-pub fn challenge_two(input: String) -> u32 {
+pub fn day_two_a(input: String) -> u32 {
     let scores: u32 = input
         .lines()
         .map(|l| {

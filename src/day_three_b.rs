@@ -1,28 +1,28 @@
-use std::{collections::{HashSet, hash_set::Intersection}, str::Lines, hash::Hash,};
-
-use itertools::{Itertools, Chunk};
+use std::collections::HashSet;
+use itertools::Itertools;
 
 pub fn day_three_b(all_rucksacks: String) -> u32 {
+    let mut count: u32 = 0;
 
     for chunk in all_rucksacks.lines().chunks(3).into_iter() {
-        let mut a: Vec<HashSet<char>> = vec![];
+        let mut intersection: Option<HashSet<char>> = None;
 
         for l in chunk.into_iter() {
             let set: HashSet<char> = l.chars().collect();
-            a.push(set);
+
+            intersection = match intersection {
+                None => Some(set),
+                Some(acc) => Some(&acc & &set)
+            }
         }
 
-        // a.into_iter().fold(None, |acc, set| )
-
+        if let Some(hm) = intersection {
+            count += hm.iter().map(char_to_value).sum::<u32>();
+        }
     };
 
-    0
+    count
 }
-
-fn foo(l: &str) -> HashSet<char> {
-    l.chars().collect()
-}
-
 
 fn char_to_value(&ch: &char) -> u32 {
     match ch {

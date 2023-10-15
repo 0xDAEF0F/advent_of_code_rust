@@ -5,6 +5,7 @@ enum Direction {
     Down(String),
 }
 
+#[derive(Debug)]
 enum Asset {
     File {
         name: String,
@@ -16,6 +17,7 @@ enum Asset {
     },
 }
 
+#[derive(Debug)]
 struct MyFileSystem {
     root: Asset,
     current_path: Vec<String>,
@@ -33,13 +35,16 @@ impl MyFileSystem {
     }
 
     pub fn add_file(&mut self, name: String, size: u64) {
-        let file = Asset::File { name, size };
+        let file = Asset::File {
+            name: name.to_owned(),
+            size,
+        };
         MyFileSystem::insert_at_path(&mut self.root, &self.current_path, name, file);
     }
 
     pub fn add_directory(&mut self, name: String) {
         let directory = Asset::Directory {
-            name,
+            name: name.to_owned(),
             children: HashMap::new(),
         };
         MyFileSystem::insert_at_path(&mut self.root, &self.current_path, name, directory);
@@ -75,6 +80,7 @@ impl MyFileSystem {
             if let Some(next_node) = children.get_mut(&next) {
                 MyFileSystem::insert_at_path(next_node, &path[1..], name, asset);
             } else {
+                println!("{:?}", path);
                 panic!("Path does not exist");
             }
         } else {
@@ -84,8 +90,6 @@ impl MyFileSystem {
 }
 
 pub fn day_7_a(s: String) {
-    let _root = Directory::new("/".to_string(), None, HashMap::new());
-
     let mut groups: Vec<Vec<String>> = vec![vec!["$ cd /".to_string()]];
 
     for line in s.lines() {
@@ -98,31 +102,33 @@ pub fn day_7_a(s: String) {
         }
     }
 
+    let mut file_system = MyFileSystem::new();
+
     for group in groups {
         let mut group_iter = group.iter();
         let instr = &group_iter.next().unwrap()[2..];
 
         if instr.starts_with("ls") {
             for element in group_iter {
-                let element: Element = if element.starts_with("dir") {
-                    // create directory
-                    let name = element.split(' ').next().unwrap().to_string();
-
-                    Element::Directory(Directory {
-                        name,
-                        current_path: (),
-                        contents: vec![],
-                    })
+                if element.starts_with("dir") {
+                    let name = element.split(' ').next().unwrap();
+                    file_system.add_directory(name.clone().to_string());
                 } else {
-                    let mut el_it = element.split(' ');
-                    let size: usize = el_it.next().unwrap().parse().unwrap();
-                    let name = element.split(' ').next().unwrap().to_string();
-
-                    Element::File(File { name, size })
-                };
+                    let mut el_iter = element.split(' ');
+                    let size = el_iter.next().unwrap().parse::<u64>().unwrap();
+                    let name = el_iter.next().unwrap();
+                    file_system.add_file(name.to_owned(), size);
+                }
             }
-        } else {
-            // it is a cd
+        } else if instr.starts_with("cd") {
+            let direction = match instr {
+                ".." => Direction::Up,
+                wh => Direction::Down(wh.to_owned()),
+            };
+
+            file_system.change_directory(direction);
         }
     }
+
+    println!("{:?}", file_system);
 }

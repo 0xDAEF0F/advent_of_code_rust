@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+#[derive(Debug)]
 enum Direction {
     Up,
     Down(String),
@@ -7,10 +8,9 @@ enum Direction {
 
 #[derive(Debug)]
 enum Asset {
-    File {
-        name: String,
-        size: u64,
-    },
+    #[allow(dead_code)]
+    File { name: String, size: u64 },
+    #[allow(dead_code)]
     Directory {
         name: String,
         children: HashMap<String, Asset>,
@@ -32,6 +32,28 @@ impl MyFileSystem {
             },
             current_path: vec![],
         }
+    }
+
+    pub fn root_size(&self) -> u64 {
+        match &self.root {
+            Asset::Directory { children, .. } => Self::go(&children),
+            Asset::File { .. } => panic!("Root must be a directory."),
+        }
+    }
+
+    fn go(asset: &HashMap<String, Asset>) -> u64 {
+        let mut total_size: u64 = 0;
+        for (_key, value) in asset {
+            match value {
+                Asset::File { size, .. } => total_size += size,
+                Asset::Directory { children, .. } => {
+                    let size = Self::go(children);
+                    total_size += size;
+                }
+            }
+        }
+
+        total_size
     }
 
     pub fn add_file(&mut self, name: String, size: u64) {
@@ -58,9 +80,12 @@ impl MyFileSystem {
                 self.current_path.pop();
             }
             Direction::Down(child_dir) => {
-                // verify it exists first
-
-                self.current_path.push(child_dir);
+                if child_dir == "/" {
+                    self.current_path.clear()
+                } else {
+                    // verify it exists first
+                    self.current_path.push(child_dir);
+                }
             }
         }
     }
@@ -80,7 +105,6 @@ impl MyFileSystem {
             if let Some(next_node) = children.get_mut(&next) {
                 MyFileSystem::insert_at_path(next_node, &path[1..], name, asset);
             } else {
-                println!("{:?}", path);
                 panic!("Path does not exist");
             }
         } else {
@@ -90,15 +114,13 @@ impl MyFileSystem {
 }
 
 pub fn day_7_a(s: String) {
-    let mut groups: Vec<Vec<String>> = vec![vec!["$ cd /".to_string()]];
+    let mut groups: Vec<Vec<String>> = vec![];
 
     for line in s.lines() {
-        let last_group = groups.last_mut().unwrap();
-
-        if !line.starts_with("$") {
-            last_group.push(line.to_string())
+        if line.starts_with("$") {
+            groups.push(vec![line.to_string()]);
         } else {
-            groups.push(vec![line.to_string()])
+            groups.last_mut().unwrap().push(line.to_string());
         }
     }
 
@@ -106,13 +128,13 @@ pub fn day_7_a(s: String) {
 
     for group in groups {
         let mut group_iter = group.iter();
-        let instr = &group_iter.next().unwrap()[2..];
+        let instruction = &group_iter.next().unwrap();
 
-        if instr.starts_with("ls") {
+        if instruction.starts_with("$ ls") {
             for element in group_iter {
                 if element.starts_with("dir") {
-                    let name = element.split(' ').next().unwrap();
-                    file_system.add_directory(name.clone().to_string());
+                    let name = element.split_whitespace().nth(1).unwrap();
+                    file_system.add_directory(name.to_owned());
                 } else {
                     let mut el_iter = element.split(' ');
                     let size = el_iter.next().unwrap().parse::<u64>().unwrap();
@@ -120,8 +142,8 @@ pub fn day_7_a(s: String) {
                     file_system.add_file(name.to_owned(), size);
                 }
             }
-        } else if instr.starts_with("cd") {
-            let direction = match instr {
+        } else if instruction.starts_with("$ cd") {
+            let direction = match instruction.split(' ').nth(2).unwrap() {
                 ".." => Direction::Up,
                 wh => Direction::Down(wh.to_owned()),
             };
@@ -130,5 +152,5 @@ pub fn day_7_a(s: String) {
         }
     }
 
-    println!("{:?}", file_system);
+    println!("{:?}", file_system.root_size());
 }

@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use advent_of_code::{
     day_1_a, day_1_b, day_2_a, day_2_b, day_3_a, day_3_b, day_4_a, day_4_b, day_7_a,
 };

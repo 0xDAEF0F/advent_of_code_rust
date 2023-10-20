@@ -18,13 +18,16 @@ pub fn day_8_a(s: String) -> usize {
             continue;
         }
 
-        for (j, tree) in row.iter().enumerate() {
+        for (j, _) in row.iter().enumerate() {
             if j == 0 || j == row.len() - 1 {
                 visible_trees += 1;
                 continue;
             }
 
-            // compare it to every neighbor (hard part)
+            // compare it to every neighbor
+            if is_tree_visible((i, j), &forest) {
+                visible_trees += 1;
+            }
         }
     }
 
@@ -72,5 +75,5 @@ fn is_tree_visible(coordinates: (usize, usize), forest: &Vec<Vec<u32>>) -> bool 
         }
     }
 
-    !is_left_visible && !is_down_visible && !is_right_visible && !is_up_visible
+    is_left_visible || is_down_visible || is_right_visible || is_up_visible
 }

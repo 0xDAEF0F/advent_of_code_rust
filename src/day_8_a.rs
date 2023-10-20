@@ -31,14 +31,46 @@ pub fn day_8_a(s: String) -> usize {
     visible_trees
 }
 
-fn is_tree_visible(coordinates: (usize, usize), forest: &Vec<Vec<u32>>) {
+fn is_tree_visible(coordinates: (usize, usize), forest: &Vec<Vec<u32>>) -> bool {
     let (i, j) = coordinates;
 
     let size_of_tree = forest[i][j];
-    let mut is_visible = true;
 
     // all left neighbors
-    for k in (0..i).rev() {
-        let tree_to_compare = forest[k][j];
+    let mut is_left_visible = true;
+    for j in (0..j).rev() {
+        let tree_to_compare = forest[i][j];
+        if tree_to_compare >= size_of_tree {
+            is_left_visible = false;
+        }
     }
+
+    // all down neighbors
+    let mut is_down_visible = true;
+    for i in i + 1..forest.len() {
+        let tree_to_compare = forest[i][j];
+        if tree_to_compare >= size_of_tree {
+            is_down_visible = false;
+        }
+    }
+
+    // all right neighbors
+    let mut is_right_visible = true;
+    for j in j + 1..forest[i].len() {
+        let tree_to_compare = forest[i][j];
+        if tree_to_compare >= size_of_tree {
+            is_right_visible = false;
+        }
+    }
+
+    // all up neighbors
+    let mut is_up_visible = true;
+    for i in (0..i).rev() {
+        let tree_to_compare = forest[i][j];
+        if tree_to_compare >= size_of_tree {
+            is_up_visible = false;
+        }
+    }
+
+    !is_left_visible && !is_down_visible && !is_right_visible && !is_up_visible
 }

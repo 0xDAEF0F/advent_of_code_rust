@@ -9,12 +9,71 @@ enum Move {
 }
 
 struct State {
-    head_position: (u64, u64),
-    tail_position: (u64, u64),
-    tail_unique_board_positions: HashSet<(u64, u64)>,
+    head_position: (i64, i64),
+    tail_position: (i64, i64),
+    tail_unique_board_positions: HashSet<(i64, i64)>,
 }
 
 impl State {
+    fn new() -> Self {
+        let mut hs = HashSet::new();
+        hs.insert((0, 0));
+        Self {
+            head_position: (0, 0),
+            tail_position: (0, 0),
+            tail_unique_board_positions: hs,
+        }
+    }
+
+    fn get_unique_tail_spots(&self) -> usize {
+        self.tail_unique_board_positions.len()
+    }
+
+    fn execute_movement(&mut self, to: Move) {
+        match to {
+            Move::UP(a) => {
+                let mut a = a;
+                while a != 0 {
+                    self.move_head(Move::UP(0));
+                    if !self.is_tail_stable() {
+                        self.stabilize_tail();
+                    }
+                    a -= 1;
+                }
+            }
+            Move::LEFT(a) => {
+                let mut a = a;
+                while a != 0 {
+                    self.move_head(Move::LEFT(0));
+                    if !self.is_tail_stable() {
+                        self.stabilize_tail();
+                    }
+                    a -= 1;
+                }
+            }
+            Move::DOWN(a) => {
+                let mut a = a;
+                while a != 0 {
+                    self.move_head(Move::DOWN(0));
+                    if !self.is_tail_stable() {
+                        self.stabilize_tail();
+                    }
+                    a -= 1;
+                }
+            }
+            Move::RIGHT(a) => {
+                let mut a = a;
+                while a != 0 {
+                    self.move_head(Move::RIGHT(0));
+                    if !self.is_tail_stable() {
+                        self.stabilize_tail();
+                    }
+                    a -= 1;
+                }
+            }
+        }
+    }
+
     fn move_head(&mut self, to: Move) {
         match to {
             Move::UP(_) => self.head_position = (self.head_position.0, self.head_position.1 + 1),
@@ -39,27 +98,43 @@ impl State {
         let (x1, y1) = self.head_position;
         let (x2, y2) = self.tail_position;
 
+        println!("BEFORE: head: {:?} — tail: {:?}", (x1, y1), (x2, y2));
+
         if x1.abs_diff(x2) == 2 && y1.abs_diff(y2) == 2 {
             // diagonal move
-            if x2 > x1 {
-                // notch x1 && y1 one plus
+            if x1 > x2 {
+                self.tail_position = (x2 + 1, y2 + 1);
             } else {
-                // notch x2 && y2 one plus
+                self.tail_position = (x2 - 1, y2 - 1);
             }
         } else if x1.abs_diff(x2) == 2 {
             // horizontal move
-            if x2 > x1 {
-                // notch to the
+            if x1 > x2 {
+                self.tail_position = (x2 + 1, y2);
+            } else {
+                self.tail_position = (x2 - 1, y2);
             }
         } else if y1.abs_diff(y2) == 2 {
             // vertical move
+            if y1 > y2 {
+                self.tail_position = (x2, y2 + 1);
+            } else {
+                self.tail_position = (x2, y2 - 1);
+            }
         } else {
             panic!("Unreachable");
         }
+
+        println!(
+            "AFTER: head: {:?} — tail: {:?}",
+            self.head_position, self.tail_position
+        );
+
+        self.tail_unique_board_positions.insert(self.tail_position);
     }
 }
 
-pub fn day_9_a(a: String) -> u64 {
+pub fn day_9_a(a: String) -> usize {
     let a: Vec<Move> = a
         .lines()
         .map(|l| {
@@ -81,34 +156,11 @@ pub fn day_9_a(a: String) -> u64 {
         })
         .collect();
 
-    println!("{:?}", a);
+    let mut state = State::new();
 
-    0
-}
-
-fn execute_moves(moves: Vec<Move>) {
-    for movement in moves {}
-}
-
-fn execute_movement(movement: Move, state: State) -> State {
-    let (x, y) = state.head_position;
-
-    let new_head_position = match movement {
-        Move::UP(_) => (x, y + 1),
-        Move::LEFT(_) => (x - 1, y),
-        Move::DOWN(_) => (x, y - 1),
-        Move::RIGHT(_) => (x + 1, y),
-    };
-
-    let tail = state.tail_position;
-
-    if is_tail_stable(new_head_position, tail) {
-        return State {
-            head_position: new_head_position,
-            tail_position: tail,
-            tail_unique_board_positions: state.tail_unique_board_positions,
-        };
-    } else {
-        // recompute the tail position
+    for movement in a {
+        state.execute_movement(movement);
     }
+
+    state.get_unique_tail_spots()
 }

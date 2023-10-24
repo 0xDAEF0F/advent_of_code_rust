@@ -2,10 +2,10 @@ use std::collections::HashSet;
 
 #[derive(Debug)]
 enum Move {
-    UP(u64),
-    LEFT(u64),
-    DOWN(u64),
-    RIGHT(u64),
+    UP,
+    LEFT,
+    DOWN,
+    RIGHT,
 }
 
 struct State {
@@ -30,56 +30,18 @@ impl State {
     }
 
     fn execute_movement(&mut self, to: Move) {
-        match to {
-            Move::UP(a) => {
-                let mut a = a;
-                while a != 0 {
-                    self.move_head(Move::UP(0));
-                    if !self.is_tail_stable() {
-                        self.stabilize_tail();
-                    }
-                    a -= 1;
-                }
-            }
-            Move::LEFT(a) => {
-                let mut a = a;
-                while a != 0 {
-                    self.move_head(Move::LEFT(0));
-                    if !self.is_tail_stable() {
-                        self.stabilize_tail();
-                    }
-                    a -= 1;
-                }
-            }
-            Move::DOWN(a) => {
-                let mut a = a;
-                while a != 0 {
-                    self.move_head(Move::DOWN(0));
-                    if !self.is_tail_stable() {
-                        self.stabilize_tail();
-                    }
-                    a -= 1;
-                }
-            }
-            Move::RIGHT(a) => {
-                let mut a = a;
-                while a != 0 {
-                    self.move_head(Move::RIGHT(0));
-                    if !self.is_tail_stable() {
-                        self.stabilize_tail();
-                    }
-                    a -= 1;
-                }
-            }
+        self.move_head(to);
+        if !self.is_tail_stable() {
+            self.stabilize_tail();
         }
     }
 
     fn move_head(&mut self, to: Move) {
         match to {
-            Move::UP(_) => self.head_position = (self.head_position.0, self.head_position.1 + 1),
-            Move::LEFT(_) => self.head_position = (self.head_position.0 - 1, self.head_position.1),
-            Move::DOWN(_) => self.head_position = (self.head_position.0, self.head_position.1 - 1),
-            Move::RIGHT(_) => self.head_position = (self.head_position.0 + 1, self.head_position.1),
+            Move::UP => self.head_position = (self.head_position.0, self.head_position.1 + 1),
+            Move::LEFT => self.head_position = (self.head_position.0 - 1, self.head_position.1),
+            Move::DOWN => self.head_position = (self.head_position.0, self.head_position.1 - 1),
+            Move::RIGHT => self.head_position = (self.head_position.0 + 1, self.head_position.1),
         }
     }
 
@@ -138,9 +100,9 @@ impl State {
 }
 
 pub fn day_9_a(a: String) -> usize {
-    let a: Vec<Move> = a
+    let all_moves: Vec<Move> = a
         .lines()
-        .map(|l| {
+        .flat_map(|l| {
             let mut iter = l.split_whitespace();
             let direction = iter.next().expect("Direction should not be empty");
             let quantity: u64 = iter
@@ -149,19 +111,21 @@ pub fn day_9_a(a: String) -> usize {
                 .parse()
                 .expect("Should be able to parse");
 
-            match direction {
-                "U" => Move::UP(quantity),
-                "L" => Move::LEFT(quantity),
-                "D" => Move::DOWN(quantity),
-                "R" => Move::RIGHT(quantity),
+            let moves: Box<dyn Iterator<Item = Move>> = match direction {
+                "U" => Box::new((0..quantity).map(|_| Move::UP)),
+                "L" => Box::new((0..quantity).map(|_| Move::LEFT)),
+                "D" => Box::new((0..quantity).map(|_| Move::DOWN)),
+                "R" => Box::new((0..quantity).map(|_| Move::RIGHT)),
                 _ => panic!("There is no other direction to move other than U, L, D, R."),
-            }
+            };
+
+            moves
         })
         .collect();
 
     let mut state = State::new();
 
-    for movement in a {
+    for movement in all_moves {
         state.execute_movement(movement);
     }
 

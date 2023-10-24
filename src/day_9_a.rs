@@ -98,37 +98,40 @@ impl State {
         let (x1, y1) = self.head_position;
         let (x2, y2) = self.tail_position;
 
-        println!("BEFORE: head: {:?} — tail: {:?}", (x1, y1), (x2, y2));
-
-        if x1.abs_diff(x2) == 2 && y1.abs_diff(y2) == 2 {
-            // diagonal move
-            if x1 > x2 {
-                self.tail_position = (x2 + 1, y2 + 1);
-            } else {
-                self.tail_position = (x2 - 1, y2 - 1);
-            }
-        } else if x1.abs_diff(x2) == 2 {
+        if x1.abs_diff(x2) == 2 && y1.abs_diff(y2) == 0 {
             // horizontal move
             if x1 > x2 {
                 self.tail_position = (x2 + 1, y2);
             } else {
                 self.tail_position = (x2 - 1, y2);
             }
-        } else if y1.abs_diff(y2) == 2 {
-            // vertical move
+        } else if y1.abs_diff(y2) == 2 && x1.abs_diff(x2) == 0 {
+            // vertical straight move
             if y1 > y2 {
                 self.tail_position = (x2, y2 + 1);
             } else {
                 self.tail_position = (x2, y2 - 1);
             }
         } else {
-            panic!("Unreachable");
+            // diagonal move
+            if y1 > y2 {
+                // diagonal up
+                if x1 > x2 {
+                    // diagonal up-right
+                    self.tail_position = (x2 + 1, y2 + 1);
+                } else {
+                    self.tail_position = (x2 - 1, y2 + 1);
+                }
+            } else {
+                // diagonal down
+                if x1 > x2 {
+                    // diagonal down-right
+                    self.tail_position = (x2 + 1, y2 - 1);
+                } else {
+                    self.tail_position = (x2 - 1, y2 - 1);
+                }
+            }
         }
-
-        println!(
-            "AFTER: head: {:?} — tail: {:?}",
-            self.head_position, self.tail_position
-        );
 
         self.tail_unique_board_positions.insert(self.tail_position);
     }

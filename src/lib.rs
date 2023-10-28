@@ -1,4 +1,5 @@
 pub mod day_10_a;
+pub mod day_10_b;
 pub mod day_1_a;
 pub mod day_1_b;
 pub mod day_2_a;

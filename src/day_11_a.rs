@@ -1,3 +1,4 @@
+#[derive(Debug)]
 struct Monkey {
     items: Vec<u32>,
     monkey_index: usize,
@@ -59,12 +60,6 @@ impl Monkey {
         }
     }
 
-    fn execute_monkey_turn(&mut self, monkeys: &mut Vec<Monkey>) {
-        for item in self.items.iter() {
-            //
-        }
-    }
-
     fn get_new_worry_level(&self, worry_level: u32) -> u32 {
         match self.monkey_index {
             0 => worry_level * 7,
@@ -108,22 +103,36 @@ pub fn day_11_a(str: String) {
         })
         .collect();
 
-    for _ in 0..=20 {
-        for monkey in 0..monkeys.len() {
-            // iterate over the monkey's items
-            let a = monkey.items.iter().map(|item| {
-                let new_worry_level = monkey.get_new_worry_level(*item);
-                let throw_to = match monkey.throw_item_to(new_worry_level) {
-                    true => monkey.throw_idx_if_true,
-                    false => monkey.throw_idx_if_false,
-                };
+    let _total_items_start = monkeys.iter().fold(0, |acc, e| acc + e.items.len());
+    println!("{:?}", _total_items_start);
 
-                (new_worry_level, throw_to)
-            });
+    let actions: Vec<Vec<_>> = monkeys
+        .iter()
+        .map(|monkey| {
+            monkey
+                .items
+                .iter()
+                .map(|item| {
+                    let worry_level = monkey.get_new_worry_level(*item);
+                    let throw_to = match monkey.throw_item_to(worry_level) {
+                        true => monkey.throw_idx_if_true,
+                        false => monkey.throw_idx_if_false,
+                    };
 
-            for (item, to) in a {
-                &monkeys[to].items.push(item);
-            }
+                    (worry_level, throw_to)
+                })
+                .collect()
+        })
+        .collect();
+
+    for (i, monkey_action) in actions.iter().enumerate() {
+        for (item, throw_to) in monkey_action {
+            _ = &monkeys[*throw_to].items.push(*item);
+            monkeys[i].inspected_items += 1;
         }
+        monkeys[i].items.clear();
     }
+
+    let _total_items_end = monkeys.iter().fold(0, |acc, e| acc + e.items.len());
+    println!("{:?}", _total_items_end)
 }

@@ -1,14 +1,14 @@
 #[derive(Debug)]
 struct Monkey {
-    items: Vec<u32>,
+    items: Vec<u64>,
     monkey_index: usize,
-    inspected_items: u32,
+    inspected_items: usize,
     throw_idx_if_true: usize,
     throw_idx_if_false: usize,
 }
 
 impl Monkey {
-    fn get_initial_items(monkey: u8) -> Vec<u32> {
+    fn get_initial_items(monkey: u8) -> Vec<u64> {
         match monkey {
             0 => vec![85, 77, 77],
             1 => vec![80, 99],
@@ -60,7 +60,7 @@ impl Monkey {
         }
     }
 
-    fn get_new_worry_level(&self, worry_level: u32) -> u32 {
+    fn get_new_worry_level(&self, worry_level: u64) -> u64 {
         match self.monkey_index {
             0 => worry_level * 7,
             1 => worry_level * 11,
@@ -74,7 +74,7 @@ impl Monkey {
         }
     }
 
-    fn throw_item_to(&self, worry_level: u32) -> bool {
+    fn throw_item_to(&self, worry_level: u64) -> bool {
         match self.monkey_index {
             0 => worry_level % 19 == 0,
             1 => worry_level % 3 == 0,
@@ -87,9 +87,37 @@ impl Monkey {
             _ => panic!("Monkey does not exist!"),
         }
     }
+
+    fn play_monkey_round(monkeys: &mut Vec<Monkey>) {
+        for i in 0..monkeys.len() {
+            let monkey = &mut monkeys[i];
+
+            monkey.inspected_items += monkey.items.len();
+
+            let action: Vec<(u64, usize)> = monkey
+                .items
+                .iter()
+                .map(|item| {
+                    let worry_level = monkey.get_new_worry_level(*item);
+                    let throw_to = match monkey.throw_item_to(worry_level) {
+                        true => monkey.throw_idx_if_true,
+                        false => monkey.throw_idx_if_false,
+                    };
+
+                    (worry_level / 3, throw_to)
+                })
+                .collect();
+
+            monkey.items.clear();
+
+            for (item, who_to_throw) in action {
+                monkeys[who_to_throw].items.push(item);
+            }
+        }
+    }
 }
 
-pub fn day_11_a(str: String) {
+pub fn day_11_a(_str: String) {
     let mut monkeys: Vec<Monkey> = (0..=7)
         .map(|i| {
             let items = Monkey::get_initial_items(i);
@@ -103,36 +131,10 @@ pub fn day_11_a(str: String) {
         })
         .collect();
 
-    let _total_items_start = monkeys.iter().fold(0, |acc, e| acc + e.items.len());
-    println!("{:?}", _total_items_start);
-
-    let actions: Vec<Vec<_>> = monkeys
-        .iter()
-        .map(|monkey| {
-            monkey
-                .items
-                .iter()
-                .map(|item| {
-                    let worry_level = monkey.get_new_worry_level(*item);
-                    let throw_to = match monkey.throw_item_to(worry_level) {
-                        true => monkey.throw_idx_if_true,
-                        false => monkey.throw_idx_if_false,
-                    };
-
-                    (worry_level, throw_to)
-                })
-                .collect()
-        })
-        .collect();
-
-    for (i, monkey_action) in actions.iter().enumerate() {
-        for (item, throw_to) in monkey_action {
-            _ = &monkeys[*throw_to].items.push(*item);
-            monkeys[i].inspected_items += 1;
-        }
-        monkeys[i].items.clear();
+    for _ in 1..=20 {
+        Monkey::play_monkey_round(&mut monkeys);
     }
 
-    let _total_items_end = monkeys.iter().fold(0, |acc, e| acc + e.items.len());
-    println!("{:?}", _total_items_end)
+    monkeys.sort_by_key(|k| k.inspected_items);
+    println!("{:?}", monkeys);
 }

@@ -97,14 +97,16 @@ impl Monkey {
             let action: Vec<(u64, usize)> = monkey
                 .items
                 .iter()
-                .map(|item| {
-                    let worry_level = monkey.get_new_worry_level(*item);
-                    let throw_to = match monkey.throw_item_to(worry_level) {
+                .map(|&item| {
+                    let worry_level = monkey.get_new_worry_level(item);
+                    let new_worry_level = worry_level / 3;
+
+                    let throw_to = match monkey.throw_item_to(new_worry_level) {
                         true => monkey.throw_idx_if_true,
                         false => monkey.throw_idx_if_false,
                     };
 
-                    (worry_level / 3, throw_to)
+                    (new_worry_level, throw_to)
                 })
                 .collect();
 
@@ -117,7 +119,7 @@ impl Monkey {
     }
 }
 
-pub fn day_11_a(_str: String) {
+pub fn day_11_a(_str: String) -> usize {
     let mut monkeys: Vec<Monkey> = (0..=7)
         .map(|i| {
             let items = Monkey::get_initial_items(i);
@@ -136,5 +138,8 @@ pub fn day_11_a(_str: String) {
     }
 
     monkeys.sort_by_key(|k| k.inspected_items);
-    println!("{:?}", monkeys);
+
+    let result = monkeys[7].inspected_items * monkeys[6].inspected_items;
+
+    result
 }

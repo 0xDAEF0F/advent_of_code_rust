@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use advent_of_code::{
-    day_10_a, day_10_b, day_11_a, day_1_a, day_1_b, day_2_a, day_2_b, day_3_a, day_3_b, day_4_a,
-    day_4_b, day_7_a, day_8_a, day_8_b, day_9_a, day_9_b,
+    day_10_a, day_10_b, day_11_a, day_11_b, day_1_a, day_1_b, day_2_a, day_2_b, day_3_a, day_3_b,
+    day_4_a, day_4_b, day_7_a, day_8_a, day_8_b, day_9_a, day_9_b,
 };
 use std::fs;
 
@@ -51,8 +51,11 @@ fn main() -> std::io::Result<()> {
     // let input = fs::read_to_string("input_day_10.txt")?;
     // println!("Day 10B:\n {}", day_10_b::day_10_b(input));
     //
+    // let input = fs::read_to_string("input_day_11.txt")?;
+    // println!("Day 11A: {:?}", day_11_a::day_11_a(input));
+    //
     let input = fs::read_to_string("input_day_11.txt")?;
-    println!("Day 11A: {:?}", day_11_a::day_11_a(input));
+    println!("Day 11B: {:?}", day_11_b::day_11_b(input));
 
     Ok(())
 }
